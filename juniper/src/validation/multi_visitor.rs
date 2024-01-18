@@ -8,6 +8,8 @@ use crate::{
     value::ScalarValue,
 };
 
+use super::traits::InputSpanning;
+
 #[doc(hidden)]
 pub struct MultiVisitorNil;
 
@@ -177,38 +179,50 @@ where
         self.1.exit_inline_fragment(ctx, f);
     }
 
-    fn enter_null_value(&mut self, ctx: &mut ValidatorContext<'a, S>, n: Spanning<()>) {
+    fn enter_null_value(&mut self, ctx: &mut ValidatorContext<'a, S>, n: InputSpanning<'a, ()>) {
         self.0.enter_null_value(ctx, n);
         self.1.enter_null_value(ctx, n);
     }
-    fn exit_null_value(&mut self, ctx: &mut ValidatorContext<'a, S>, n: Spanning<()>) {
+    fn exit_null_value(&mut self, ctx: &mut ValidatorContext<'a, S>, n: InputSpanning<'a, ()>) {
         self.0.exit_null_value(ctx, n);
         self.1.exit_null_value(ctx, n);
     }
 
-    fn enter_scalar_value(&mut self, ctx: &mut ValidatorContext<'a, S>, n: Spanning<&'a S>) {
+    fn enter_scalar_value(&mut self, ctx: &mut ValidatorContext<'a, S>, n: InputSpanning<'a, S>) {
         self.0.enter_scalar_value(ctx, n);
         self.1.enter_scalar_value(ctx, n);
     }
-    fn exit_scalar_value(&mut self, ctx: &mut ValidatorContext<'a, S>, n: Spanning<&'a S>) {
+    fn exit_scalar_value(&mut self, ctx: &mut ValidatorContext<'a, S>, n: InputSpanning<'a, S>) {
         self.0.exit_scalar_value(ctx, n);
         self.1.exit_scalar_value(ctx, n);
     }
 
-    fn enter_enum_value(&mut self, ctx: &mut ValidatorContext<'a, S>, s: Spanning<&'a String>) {
+    fn enter_enum_value(
+        &mut self,
+        ctx: &mut ValidatorContext<'a, S>,
+        s: InputSpanning<'a, String>,
+    ) {
         self.0.enter_enum_value(ctx, s);
         self.1.enter_enum_value(ctx, s);
     }
-    fn exit_enum_value(&mut self, ctx: &mut ValidatorContext<'a, S>, s: Spanning<&'a String>) {
+    fn exit_enum_value(&mut self, ctx: &mut ValidatorContext<'a, S>, s: InputSpanning<'a, String>) {
         self.0.exit_enum_value(ctx, s);
         self.1.exit_enum_value(ctx, s);
     }
 
-    fn enter_variable_value(&mut self, ctx: &mut ValidatorContext<'a, S>, s: Spanning<&'a String>) {
+    fn enter_variable_value(
+        &mut self,
+        ctx: &mut ValidatorContext<'a, S>,
+        s: InputSpanning<'a, String>,
+    ) {
         self.0.enter_variable_value(ctx, s);
         self.1.enter_variable_value(ctx, s);
     }
-    fn exit_variable_value(&mut self, ctx: &mut ValidatorContext<'a, S>, s: Spanning<&'a String>) {
+    fn exit_variable_value(
+        &mut self,
+        ctx: &mut ValidatorContext<'a, S>,
+        s: InputSpanning<'a, String>,
+    ) {
         self.0.exit_variable_value(ctx, s);
         self.1.exit_variable_value(ctx, s);
     }
@@ -216,7 +230,7 @@ where
     fn enter_list_value(
         &mut self,
         ctx: &mut ValidatorContext<'a, S>,
-        l: Spanning<&'a Vec<Spanning<InputValue<S>>>>,
+        l: InputSpanning<'a, Vec<Spanning<InputValue<S>>>>,
     ) {
         self.0.enter_list_value(ctx, l);
         self.1.enter_list_value(ctx, l);
@@ -224,7 +238,7 @@ where
     fn exit_list_value(
         &mut self,
         ctx: &mut ValidatorContext<'a, S>,
-        l: Spanning<&'a Vec<Spanning<InputValue<S>>>>,
+        l: InputSpanning<'a, Vec<Spanning<InputValue<S>>>>,
     ) {
         self.0.exit_list_value(ctx, l);
         self.1.exit_list_value(ctx, l);
@@ -242,7 +256,7 @@ where
     fn enter_object_field(
         &mut self,
         ctx: &mut ValidatorContext<'a, S>,
-        f: &'a (Spanning<String>, Spanning<InputValue<S>>),
+        f: (InputSpanning<'a, String>, InputSpanning<'a, InputValue<S>>),
     ) {
         self.0.enter_object_field(ctx, f);
         self.1.enter_object_field(ctx, f);
@@ -250,11 +264,11 @@ where
     fn exit_object_field(
         &mut self,
         ctx: &mut ValidatorContext<'a, S>,
-        f: &'a (Spanning<String>, Spanning<InputValue<S>>),
+        f: (InputSpanning<'a, String>, InputSpanning<'a, InputValue<S>>),
     ) {
         self.0.exit_object_field(ctx, f);
         self.1.exit_object_field(ctx, f);
     }
 }
 
-type SpannedObject<'a, S> = Spanning<&'a Vec<(Spanning<String>, Spanning<InputValue<S>>)>>;
+type SpannedObject<'a, S> = InputSpanning<'a, Vec<(Spanning<String>, Spanning<InputValue<S>>)>>;

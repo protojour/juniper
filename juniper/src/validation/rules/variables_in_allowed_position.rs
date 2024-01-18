@@ -7,8 +7,9 @@ use std::{
 use crate::{
     ast::{Document, Fragment, FragmentSpread, Operation, Type, VariableDefinition},
     parser::Spanning,
-    validation::{ValidatorContext, Visitor},
+    validation::{traits::InputSpanning, ValidatorContext, Visitor},
     value::ScalarValue,
+    Span,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -28,7 +29,7 @@ pub fn factory<'a, S: fmt::Debug>() -> VariableInAllowedPosition<'a, S> {
 
 pub struct VariableInAllowedPosition<'a, S: fmt::Debug + 'a> {
     spreads: HashMap<Scope<'a>, HashSet<&'a str>>,
-    variable_usages: HashMap<Scope<'a>, Vec<(Spanning<&'a String>, Type<'a>)>>,
+    variable_usages: HashMap<Scope<'a>, Vec<(Spanning<&'a String, &'a Span>, Type<'a>)>>,
     #[allow(clippy::type_complexity)]
     variable_defs: HashMap<Scope<'a>, Vec<&'a (Spanning<&'a str>, VariableDefinition<'a, S>)>>,
     current_scope: Option<Scope<'a>>,
@@ -160,7 +161,7 @@ where
     fn enter_variable_value(
         &mut self,
         ctx: &mut ValidatorContext<'a, S>,
-        var_name: Spanning<&'a String>,
+        var_name: InputSpanning<'a, String>,
     ) {
         if let (Some(scope), Some(input_type)) =
             (&self.current_scope, ctx.current_input_type_literal())
@@ -168,10 +169,7 @@ where
             self.variable_usages
                 .entry(scope.clone())
                 .or_default()
-                .push((
-                    Spanning::new(var_name.span, var_name.item),
-                    input_type.clone(),
-                ));
+                .push((var_name, input_type.clone()));
         }
     }
 }

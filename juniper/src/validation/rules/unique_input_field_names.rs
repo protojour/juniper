@@ -3,7 +3,7 @@ use std::collections::hash_map::{Entry, HashMap};
 use crate::{
     ast::InputValue,
     parser::{SourcePosition, Spanning},
-    validation::{ValidatorContext, Visitor},
+    validation::{traits::InputSpanning, ValidatorContext, Visitor},
     value::ScalarValue,
 };
 
@@ -32,7 +32,7 @@ where
     fn enter_object_field(
         &mut self,
         ctx: &mut ValidatorContext<'a, S>,
-        (field_name, _): &'a (Spanning<String>, Spanning<InputValue<S>>),
+        (field_name, _): (InputSpanning<'a, String>, InputSpanning<InputValue<S>>),
     ) {
         if let Some(ref mut known_names) = self.known_name_stack.last_mut() {
             match known_names.entry(&field_name.item) {
@@ -50,7 +50,7 @@ where
     }
 }
 
-type SpannedObject<'a, S> = Spanning<&'a Vec<(Spanning<String>, Spanning<InputValue<S>>)>>;
+type SpannedObject<'a, S> = InputSpanning<'a, Vec<(Spanning<String>, Spanning<InputValue<S>>)>>;
 
 fn error_message(field_name: &str) -> String {
     format!("There can only be one input field named \"{field_name}\"")
