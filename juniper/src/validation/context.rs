@@ -22,6 +22,7 @@ pub struct RuleError {
 #[doc(hidden)]
 pub struct ValidatorContext<'a, S: Debug + 'a> {
     pub schema: &'a SchemaType<S>,
+    pub(crate) argument_validation_disabled: bool,
     errors: Vec<RuleError>,
     type_stack: Vec<Option<&'a MetaType<S>>>,
     type_literal_stack: Vec<Option<DynType<'a>>>,
@@ -75,6 +76,7 @@ impl<'a, S: Debug> ValidatorContext<'a, S> {
     pub fn new(schema: &'a SchemaType<S>, document: &Document<'a, S>) -> ValidatorContext<'a, S> {
         ValidatorContext {
             errors: Vec::new(),
+            argument_validation_disabled: false,
             schema,
             type_stack: Vec::new(),
             type_literal_stack: Vec::new(),
