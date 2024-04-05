@@ -44,6 +44,8 @@ pub struct RootNode<
     pub schema: SchemaType<S>,
     #[doc(hidden)]
     pub introspection_disabled: bool,
+    #[doc(hidden)]
+    pub argument_validation_disabled: bool,
 }
 
 impl<QueryT, MutationT, SubscriptionT>
@@ -109,6 +111,7 @@ where
             mutation_info,
             subscription_info,
             introspection_disabled: false,
+            argument_validation_disabled: false,
         }
     }
 
