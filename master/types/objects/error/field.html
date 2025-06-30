@@ -31,21 +31,33 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../../../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../../../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../../toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +71,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +85,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,13 +122,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -186,12 +200,12 @@ impl Example {
 }
 <span class="boring">
 </span><span class="boring">fn main() {}</span></code></pre></pre>
-<p><a href="https://docs.rs/juniper/0.16.1/juniper/executor/type.FieldResult.html"><code>FieldResult&lt;T&gt;</code></a> is an alias for <a href="https://docs.rs/juniper/0.16.1/juniper/executor/struct.FieldError.html"><code>Result&lt;T, FieldError&gt;</code></a>, which is the <a href="https://spec.graphql.org/October2021#sec-Errors.Field-errors">error type</a> all fallible <a href="https://spec.graphql.org/October2021#sec-Language.Fields">fields</a> must return. By using the <a href="https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator"><code>?</code> operator</a>, any type that implements the <a href="https://doc.rust-lang.org/stable/std/fmt/trait.Display.html"><code>Display</code> trait</a> (which most of the error types out there do) can be automatically converted into a <a href="https://docs.rs/juniper/0.16.1/juniper/executor/struct.FieldError.html"><code>FieldError</code></a>.</p>
+<p><a href="https://docs.rs/juniper/0.16.2/juniper/executor/type.FieldResult.html"><code>FieldResult&lt;T&gt;</code></a> is an alias for <a href="https://docs.rs/juniper/0.16.2/juniper/executor/struct.FieldError.html"><code>Result&lt;T, FieldError&gt;</code></a>, which is the <a href="https://spec.graphql.org/October2021#sec-Errors.Field-errors">error type</a> all fallible <a href="https://spec.graphql.org/October2021#sec-Language.Fields">fields</a> must return. By using the <a href="https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator"><code>?</code> operator</a>, any type that implements the <a href="https://doc.rust-lang.org/stable/std/fmt/trait.Display.html"><code>Display</code> trait</a> (which most of the error types out there do) can be automatically converted into a <a href="https://docs.rs/juniper/0.16.2/juniper/executor/struct.FieldError.html"><code>FieldError</code></a>.</p>
 <blockquote>
-<p><strong>TIP</strong>: If a custom conversion into a <a href="https://docs.rs/juniper/0.16.1/juniper/executor/struct.FieldError.html"><code>FieldError</code></a> is needed (to <a href="https://spec.graphql.org/October2021#sel-GAPHRPZCAACCC_7Q">fill up <code>extensions</code></a>, for example), the <a href="https://docs.rs/juniper/0.16.1/juniper/executor/trait.IntoFieldError.html"><code>IntoFieldError</code> trait</a> should be implemented.</p>
+<p><strong>TIP</strong>: If a custom conversion into a <a href="https://docs.rs/juniper/0.16.2/juniper/executor/struct.FieldError.html"><code>FieldError</code></a> is needed (to <a href="https://spec.graphql.org/October2021#sel-GAPHRPZCAACCC_7Q">fill up <code>extensions</code></a>, for example), the <a href="https://docs.rs/juniper/0.16.2/juniper/executor/trait.IntoFieldError.html"><code>IntoFieldError</code> trait</a> should be implemented.</p>
 </blockquote>
 <blockquote>
-<p><strong>NOTE</strong>: <a href="https://docs.rs/juniper/0.16.1/juniper/executor/struct.FieldError.html"><code>FieldError</code></a>s are <a href="https://spec.graphql.org/October2021#sec-Errors.Field-errors">GraphQL field errors</a> and are <a href="https://spec.graphql.org/October2021#sec-Introspection">not visible</a> in a <a href="https://graphql.org/learn/schema">GraphQL schema</a> in any way.</p>
+<p><strong>NOTE</strong>: <a href="https://docs.rs/juniper/0.16.2/juniper/executor/struct.FieldError.html"><code>FieldError</code></a>s are <a href="https://spec.graphql.org/October2021#sec-Errors.Field-errors">GraphQL field errors</a> and are <a href="https://spec.graphql.org/October2021#sec-Introspection">not visible</a> in a <a href="https://graphql.org/learn/schema">GraphQL schema</a> in any way.</p>
 </blockquote>
 <h2 id="error-payloads-null-and-partial-errors"><a class="header" href="#error-payloads-null-and-partial-errors">Error payloads, <code>null</code>, and partial errors</a></h2>
 <p><a href="https://docs.rs/juniper">Juniper</a>'s error behavior conforms to the <a href="https://spec.graphql.org/October2021#sec-Handling-Field-Errors">GraphQL specification</a>.</p>
@@ -238,7 +252,7 @@ impl Example {
 }
 </code></pre>
 <h2 id="additional-information"><a class="header" href="#additional-information">Additional information</a></h2>
-<p>Sometimes it's desirable to return additional structured error information to clients. This can be accomplished by implementing the <a href="https://docs.rs/juniper/0.16.1/juniper/executor/trait.IntoFieldError.html"><code>IntoFieldError</code> trait</a>:</p>
+<p>Sometimes it's desirable to return additional structured error information to clients. This can be accomplished by implementing the <a href="https://docs.rs/juniper/0.16.2/juniper/executor/trait.IntoFieldError.html"><code>IntoFieldError</code> trait</a>:</p>
 <pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">#[macro_use] extern crate juniper;
 </span><span class="boring">use juniper::{FieldError, IntoFieldError, ScalarValue, graphql_object};
 </span><span class="boring">

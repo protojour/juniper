@@ -31,21 +31,33 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +71,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +85,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,13 +122,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -197,9 +211,9 @@ impl Subscription {
 <span class="boring">
 </span><span class="boring">fn main () {}</span></code></pre></pre>
 <h2 id="coordinator"><a class="header" href="#coordinator">Coordinator</a></h2>
-<p><a href="https://spec.graphql.org/October2021#sec-Subscription">GraphQL subscriptions</a> require a bit more resources than regular <a href="https://spec.graphql.org/October2021#sec-Query">queries</a> and provide a great vector for <a href="https://en.wikipedia.org/wiki/Denial-of-service_attack">DoS attacks</a>. This can can bring down a server easily if not handled correctly. The <a href="https://docs.rs/juniper/0.16.1/juniper/trait.SubscriptionCoordinator.html"><code>SubscriptionCoordinator</code> trait</a> provides coordination logic to enable functionality like <a href="https://en.wikipedia.org/wiki/Denial-of-service_attack">DoS attacks</a> mitigation and resource limits.</p>
-<p>The <a href="https://docs.rs/juniper/0.16.1/juniper/trait.SubscriptionCoordinator.html"><code>SubscriptionCoordinator</code></a> contains the <a href="https://spec.graphql.org/October2021#sec-Schema">schema</a> and can keep track of opened connections, handle <a href="https://spec.graphql.org/October2021#sec-Subscription">subscription</a> start and end, and maintain a global ID for each <a href="https://spec.graphql.org/October2021#sec-Subscription">subscription</a>. Each time a connection is established, the <a href="https://docs.rs/juniper/0.16.1/juniper/trait.SubscriptionCoordinator.html"><code>SubscriptionCoordinator</code></a> spawns a [32], which handles a single connection, providing resolver logic for a client stream as well as reconnection and shutdown logic.</p>
-<p>While we can implement <a href="https://docs.rs/juniper/0.16.1/juniper/trait.SubscriptionCoordinator.html"><code>SubscriptionCoordinator</code></a> ourselves, <a href="https://docs.rs/juniper">Juniper</a> contains a simple and generic implementation called <a href="https://docs.rs/juniper_subscriptions/0.17.0/juniper_subscriptions/struct.Coordinator.html"><code>Coordinator</code></a>. The <code>subscribe</code> method returns a <a href="https://doc.rust-lang.org/stable/std/future/trait.Future.html"><code>Future</code></a> resolving into a <code>Result&lt;Connection, GraphQLError&gt;</code>, where <a href="https://docs.rs/juniper_subscriptions/0.17.0/juniper_subscriptions/struct.Connection.html"><code>Connection</code></a> is a <a href="https://docs.rs/futures/latest/futures/stream/trait.Stream.html"><code>Stream</code></a> of <a href="https://spec.graphql.org/October2021#sec-Values">values</a> returned by the operation, and a <a href="https://docs.rs/juniper/0.16.1/juniper/enum.GraphQLError.html"><code>GraphQLError</code></a> is the error when the <a href="https://spec.graphql.org/October2021#sec-Subscription">subscription operation</a> fails.</p>
+<p><a href="https://spec.graphql.org/October2021#sec-Subscription">GraphQL subscriptions</a> require a bit more resources than regular <a href="https://spec.graphql.org/October2021#sec-Query">queries</a> and provide a great vector for <a href="https://en.wikipedia.org/wiki/Denial-of-service_attack">DoS attacks</a>. This can can bring down a server easily if not handled correctly. The <a href="https://docs.rs/juniper/0.16.2/juniper/trait.SubscriptionCoordinator.html"><code>SubscriptionCoordinator</code> trait</a> provides coordination logic to enable functionality like <a href="https://en.wikipedia.org/wiki/Denial-of-service_attack">DoS attacks</a> mitigation and resource limits.</p>
+<p>The <a href="https://docs.rs/juniper/0.16.2/juniper/trait.SubscriptionCoordinator.html"><code>SubscriptionCoordinator</code></a> contains the <a href="https://spec.graphql.org/October2021#sec-Schema">schema</a> and can keep track of opened connections, handle <a href="https://spec.graphql.org/October2021#sec-Subscription">subscription</a> start and end, and maintain a global ID for each <a href="https://spec.graphql.org/October2021#sec-Subscription">subscription</a>. Each time a connection is established, the <a href="https://docs.rs/juniper/0.16.2/juniper/trait.SubscriptionCoordinator.html"><code>SubscriptionCoordinator</code></a> spawns a [32], which handles a single connection, providing resolver logic for a client stream as well as reconnection and shutdown logic.</p>
+<p>While we can implement <a href="https://docs.rs/juniper/0.16.2/juniper/trait.SubscriptionCoordinator.html"><code>SubscriptionCoordinator</code></a> ourselves, <a href="https://docs.rs/juniper">Juniper</a> contains a simple and generic implementation called <a href="https://docs.rs/juniper_subscriptions/0.17.0/juniper_subscriptions/struct.Coordinator.html"><code>Coordinator</code></a>. The <code>subscribe</code> method returns a <a href="https://doc.rust-lang.org/stable/std/future/trait.Future.html"><code>Future</code></a> resolving into a <code>Result&lt;Connection, GraphQLError&gt;</code>, where <a href="https://docs.rs/juniper_subscriptions/0.17.0/juniper_subscriptions/struct.Connection.html"><code>Connection</code></a> is a <a href="https://docs.rs/futures/latest/futures/stream/trait.Stream.html"><code>Stream</code></a> of <a href="https://spec.graphql.org/October2021#sec-Values">values</a> returned by the operation, and a <a href="https://docs.rs/juniper/0.16.2/juniper/enum.GraphQLError.html"><code>GraphQLError</code></a> is the error when the <a href="https://spec.graphql.org/October2021#sec-Subscription">subscription operation</a> fails.</p>
 <pre><pre class="playground"><code class="language-rust edition2024"><span class="boring">extern crate futures;
 </span><span class="boring">extern crate juniper;
 </span><span class="boring">extern crate juniper_subscriptions;
@@ -251,7 +265,7 @@ impl Subscription {
 </span><span class="boring">    }
 </span><span class="boring">}
 </span><span class="boring">
-</span>type Schema = RootNode&lt;'static, Query, EmptyMutation&lt;Database&gt;, Subscription&gt;;
+</span>type Schema = RootNode&lt;Query, EmptyMutation&lt;Database&gt;, Subscription&gt;;
 
 fn schema() -&gt; Schema {
     Schema::new(Query, EmptyMutation::new(), Subscription)
